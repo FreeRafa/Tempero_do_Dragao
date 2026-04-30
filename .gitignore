@@ -1,0 +1,33 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# NuGet
+packages/
+
+# SQL Server
+*.mdf
+*.ldf
+
+# Publish
+publish/
+
+# Node
+node_modules/
+
+# Environment
+.env

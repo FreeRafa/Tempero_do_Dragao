@@ -1,0 +1,492 @@
+﻿@page
+@model Tempero_do_Dragao.Pages.Recipes.DetailModel
+@{
+    ViewData["Title"] = Model.Recipe?.Name ?? "Receita";
+}
+
+<style>
+    :root {
+        --red-deep:  #8B0000;
+        --red-mid:   #A31515;
+        --cream:     #F5ECD7;
+        --cream-dark:#E8D9C0;
+        --gold:      #C9A84C;
+        --charcoal:  #1A1A1A;
+    }
+
+    body { background: #faf7f2; }
+
+    /* ── HERO ── */
+    .recipe-hero {
+        background: var(--red-deep);
+        padding: 3rem 2rem 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .recipe-hero::before {
+        content: '🍲';
+        position: absolute;
+        right: 4rem; top: 50%;
+        transform: translateY(-50%);
+        font-size: 10rem;
+        opacity: 0.15;
+    }
+
+    .hero-tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 500;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--gold);
+        border: 1px solid rgba(201,168,76,0.4);
+        padding: 0.3rem 0.9rem;
+        border-radius: 2px;
+        margin-bottom: 1rem;
+    }
+
+    .recipe-title {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        font-weight: 900;
+        color: var(--cream);
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+        max-width: 700px;
+    }
+
+    .recipe-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: rgba(245,236,215,0.7);
+    }
+
+    .meta-item strong { color: var(--cream); }
+
+    .hero-actions {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-favorite {
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1.5px solid rgba(201,168,76,0.5);
+        background: none;
+        color: var(--gold);
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-favorite:hover, .btn-favorite.active {
+        background: var(--gold);
+        color: var(--charcoal);
+        border-color: var(--gold);
+    }
+
+    .btn-edit {
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1.5px solid rgba(245,236,215,0.3);
+        background: none;
+        color: rgba(245,236,215,0.7);
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-edit:hover {
+        border-color: var(--cream);
+        color: var(--cream);
+    }
+
+    /* ── LAYOUT ── */
+    .content-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 2rem;
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    /* ── CARDS ── */
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.8rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--charcoal);
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid #f0ece6;
+    }
+
+    /* ── DESCRIPTION ── */
+    .recipe-desc {
+        font-size: 0.95rem;
+        color: #666;
+        font-weight: 300;
+        line-height: 1.8;
+    }
+
+    /* ── PREPARATION ── */
+    .prep-text {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.9;
+        white-space: pre-line;
+    }
+
+    /* ── SIDEBAR ── */
+    /* Ingredients */
+    .ingredient-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #f5f2ee;
+        font-size: 0.88rem;
+    }
+
+    .ingredient-item:last-child { border-bottom: none; }
+
+    .ingredient-name { color: var(--charcoal); font-weight: 400; }
+
+    .ingredient-qty {
+        color: var(--red-mid);
+        font-weight: 500;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    /* Rating */
+    .rating-avg {
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    .rating-num {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--gold);
+        line-height: 1;
+    }
+
+    .rating-stars { font-size: 1.4rem; margin: 0.3rem 0; }
+    .rating-count { font-size: 0.78rem; color: #aaa; }
+
+    .rating-form { margin-top: 1rem; }
+
+    .stars-input {
+        display: flex;
+        justify-content: center;
+        gap: 0.3rem;
+        margin-bottom: 0.8rem;
+        flex-direction: row-reverse;
+    }
+
+    .stars-input input { display: none; }
+
+    .stars-input label {
+        font-size: 1.8rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.1s;
+    }
+
+    .stars-input label:hover,
+    .stars-input label:hover ~ label,
+    .stars-input input:checked ~ label {
+        color: var(--gold);
+    }
+
+    .btn-rate {
+        width: 100%;
+        padding: 0.7rem;
+        background: var(--red-deep);
+        color: var(--cream);
+        border: none;
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-rate:hover { background: var(--red-mid); }
+
+    /* ── COMMENTS ── */
+    .comment-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f5f2ee;
+    }
+
+    .comment-item:last-child { border-bottom: none; }
+
+    .comment-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.4rem;
+    }
+
+    .comment-author {
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--charcoal);
+    }
+
+    .comment-date {
+        font-size: 0.72rem;
+        color: #bbb;
+    }
+
+    .comment-text {
+        font-size: 0.88rem;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .comment-form { margin-top: 1.2rem; }
+
+    .comment-form textarea {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1.5px solid var(--cream-dark);
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.88rem;
+        resize: vertical;
+        min-height: 90px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .comment-form textarea:focus {
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    }
+
+    .btn-comment {
+        margin-top: 0.6rem;
+        padding: 0.7rem 1.5rem;
+        background: var(--red-deep);
+        color: var(--cream);
+        border: none;
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-comment:hover { background: var(--red-mid); }
+
+    .login-prompt {
+        font-size: 0.84rem;
+        color: #aaa;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .login-prompt a { color: var(--red-mid); text-decoration: none; font-weight: 500; }
+
+    @@media (max-width: 768px) {
+        .content-wrap { grid-template-columns: 1fr; }
+    }
+</style>
+
+@if (Model.Recipe is null)
+{
+    <div style="text-align:center; padding:5rem 2rem; color:#bbb;">
+        <div style="font-size:4rem">🍽️</div>
+        <h2 style="font-family:'Playfair Display',serif; color:#ccc;">Receita não encontrada</h2>
+        <a href="/Recipes/Index" style="color:var(--red-mid);">← Voltar às receitas</a>
+    </div>
+}
+else
+{
+    var recipe = Model.Recipe;
+    var userId = HttpContext.Session.GetInt32("UserId");
+    var avgRating = recipe.Ratings.Any() ? recipe.Ratings.Average(r => r.Score) : 0;
+
+    <!-- ── HERO ── -->
+    <div class="recipe-hero">
+        <span class="hero-tag">@recipe.Category?.Name</span>
+        <h1 class="recipe-title">@recipe.Name</h1>
+
+        <div class="recipe-meta">
+            <div class="meta-item">⏱ <strong>@recipe.PreparationTime min</strong></div>
+            <div class="meta-item">📊 <strong>@recipe.Difficulty?.Level</strong></div>
+            <div class="meta-item">👤 <strong>@recipe.User?.Name</strong></div>
+            @if (recipe.Ratings.Any())
+            {
+                <div class="meta-item">⭐ <strong>@avgRating.ToString("0.0")</strong></div>
+            }
+        </div>
+
+        @if (userId != null)
+        {
+            <div class="hero-actions">
+                <form method="post" asp-page-handler="ToggleFavorite" style="display:inline">
+                    <input type="hidden" name="recipeId" value="@recipe.Id" />
+                    <button type="submit" class="btn-favorite @(Model.IsFavorite ? "active" : "")">
+                        @(Model.IsFavorite ? "❤️ Guardado" : "🤍 Guardar")
+                    </button>
+                </form>
+
+                @if (userId == recipe.UserId)
+                {
+                    <a href="/Recipes/Edit?id=@recipe.Id" class="btn-edit">✏️ Editar</a>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- ── CONTENT ── -->
+    <div class="content-wrap">
+
+        <!-- ── MAIN ── -->
+        <div>
+            @if (!string.IsNullOrEmpty(recipe.Description))
+            {
+                <div class="card">
+                    <h2 class="card-title">Sobre esta receita</h2>
+                    <p class="recipe-desc">@recipe.Description</p>
+                </div>
+            }
+
+            <div class="card">
+                <h2 class="card-title">👨‍🍳 Modo de Preparação</h2>
+                <p class="prep-text">@recipe.PreparationMethod</p>
+            </div>
+
+            <!-- ── COMMENTS ── -->
+            <div class="card">
+                <h2 class="card-title">💬 Comentários (@recipe.Comments.Count())</h2>
+
+                @foreach (var comment in recipe.Comments.OrderByDescending(c => c.CreatedAt))
+                {
+                    <div class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">👤 @comment.User?.Name</span>
+                            <span class="comment-date">@comment.CreatedAt.ToString("dd MMM yyyy")</span>
+                        </div>
+                        <p class="comment-text">@comment.Content</p>
+                    </div>
+                }
+
+                @if (!recipe.Comments.Any())
+                {
+                    <p style="color:#bbb; font-size:0.88rem; text-align:center; padding:1rem 0;">
+                        Ainda não há comentários. Sê o primeiro!
+                    </p>
+                }
+
+                @if (userId != null)
+                {
+                    <form method="post" asp-page-handler="AddComment" class="comment-form">
+                        <input type="hidden" name="recipeId" value="@recipe.Id" />
+                        <textarea name="content" placeholder="Escreve um comentário..."></textarea>
+                        <button type="submit" class="btn-comment">Comentar →</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="login-prompt">
+                        <a href="/Auth/Login">Inicia sessão</a> para comentar.
+                    </p>
+                }
+            </div>
+        </div>
+
+        <!-- ── SIDEBAR ── -->
+        <div>
+            <!-- Ingredients -->
+            <div class="card">
+                <h2 class="card-title">🧂 Ingredientes</h2>
+                @foreach (var ri in recipe.RecipeIngredients)
+                {
+                    <div class="ingredient-item">
+                        <span class="ingredient-name">@ri.Ingredient?.Name</span>
+                        <span class="ingredient-qty">@ri.Quantity @ri.Measurement?.Unit</span>
+                    </div>
+                }
+                @if (!recipe.RecipeIngredients.Any())
+                {
+                    <p style="color:#bbb; font-size:0.85rem;">Sem ingredientes registados.</p>
+                }
+            </div>
+
+            <!-- Rating -->
+            <div class="card">
+                <h2 class="card-title">⭐ Avaliação</h2>
+                <div class="rating-avg">
+                    <div class="rating-num">@(avgRating > 0 ? avgRating.ToString("0.0") : "-")</div>
+                    <div class="rating-stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <span style="color: @(i <= Math.Round(avgRating) ? "#C9A84C" : "#ddd")">★</span>
+                        }
+                    </div>
+                    <div class="rating-count">@recipe.Ratings.Count() avaliação(ões)</div>
+                </div>
+
+                @if (userId != null)
+                {
+                    <form method="post" asp-page-handler="Rate" class="rating-form">
+                        <input type="hidden" name="recipeId" value="@recipe.Id" />
+                        <div class="stars-input">
+                            @for (int i = 5; i >= 1; i--)
+                            {
+                                <input type="radio" name="score" id="star@i" value="@i"
+                                       @(Model.UserScore == i ? "checked" : "") />
+                                <label for="star@i">★</label>
+                            }
+                        </div>
+                        <button type="submit" class="btn-rate">Avaliar</button>
+                    </form>
+                }
+                else
+                {
+                    <p class="login-prompt">
+                        <a href="/Auth/Login">Inicia sessão</a> para avaliar.
+                    </p>
+                }
+            </div>
+        </div>
+
+    </div>
+}

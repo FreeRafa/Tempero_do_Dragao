@@ -1,0 +1,405 @@
+﻿@page
+@model Tempero_do_Dragao.Pages.Recipes.EditModel
+@{
+    ViewData["Title"] = "Editar Receita";
+}
+
+<style>
+    :root {
+        --red-deep:  #8B0000;
+        --red-mid:   #A31515;
+        --cream:     #F5ECD7;
+        --cream-dark:#E8D9C0;
+        --gold:      #C9A84C;
+        --charcoal:  #1A1A1A;
+    }
+
+    body { background: #faf7f2; }
+
+    .page-header {
+        background: var(--red-deep);
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '✏️';
+        position: absolute;
+        right: 3rem; top: 50%;
+        transform: translateY(-50%);
+        font-size: 8rem;
+        opacity: 0.08;
+    }
+
+    .page-header .tag {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 500;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--gold);
+        border: 1px solid rgba(201,168,76,0.4);
+        padding: 0.3rem 0.9rem;
+        border-radius: 2px;
+        margin-bottom: 0.8rem;
+    }
+
+    .page-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: var(--cream);
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+    }
+
+    .page-header h1 span { color: var(--gold); }
+
+    .form-wrap {
+        max-width: 860px;
+        margin: 2.5rem auto;
+        padding: 0 2rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--charcoal);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 2px solid var(--cream-dark);
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+    }
+
+    .col-full { grid-column: 1 / -1; }
+
+    .field { margin-bottom: 1.2rem; }
+
+    .field label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--charcoal);
+        margin-bottom: 0.4rem;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1.5px solid var(--cream-dark);
+        border-radius: 6px;
+        background: white;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.9rem;
+        color: var(--charcoal);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    }
+
+    .field textarea { resize: vertical; min-height: 120px; }
+
+    .field-error {
+        font-size: 0.74rem;
+        color: var(--red-mid);
+        margin-top: 0.3rem;
+        display: block;
+    }
+
+    .ingredient-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1.5fr auto;
+        gap: 0.8rem;
+        align-items: end;
+        margin-bottom: 0.8rem;
+    }
+
+    .btn-remove-ingredient {
+        background: none;
+        border: 1.5px solid #ffcdd2;
+        color: var(--red-mid);
+        width: 38px;
+        height: 38px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .btn-remove-ingredient:hover { background: #ffebee; }
+
+    .btn-add-ingredient {
+        background: none;
+        border: 1.5px dashed var(--cream-dark);
+        color: #aaa;
+        padding: 0.7rem 1.2rem;
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 0.4rem;
+        transition: all 0.2s;
+    }
+
+    .btn-add-ingredient:hover {
+        border-color: var(--gold);
+        color: var(--gold);
+    }
+
+    .alert-error {
+        background: rgba(139,0,0,0.06);
+        border-left: 3px solid var(--red-mid);
+        color: var(--red-deep);
+        padding: 0.8rem 1rem;
+        font-size: 0.84rem;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .btn-cancel {
+        padding: 0.85rem 1.8rem;
+        background: none;
+        border: 1.5px solid var(--cream-dark);
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        color: #888;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover { border-color: #bbb; color: #555; }
+
+    .btn-submit {
+        padding: 0.85rem 2.5rem;
+        background: var(--red-deep);
+        color: var(--cream);
+        border: none;
+        border-radius: 6px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-submit:hover { background: var(--red-mid); transform: translateY(-1px); }
+
+    @@media (max-width: 640px) {
+        .grid-2 { grid-template-columns: 1fr; }
+        .col-full { grid-column: 1; }
+        .ingredient-row { grid-template-columns: 1fr 1fr; }
+        .ingredient-row .field:first-child { grid-column: 1 / -1; }
+    }
+</style>
+
+<!-- ── HEADER ── -->
+<div class="page-header">
+    <span class="tag">Editar</span>
+    <h1>Editar <span>Receita</span></h1>
+</div>
+
+<div class="form-wrap">
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert-error">⚠ @Model.ErrorMessage</div>
+    }
+
+    <form method="post" id="recipeForm">
+        <input type="hidden" name="id" value="@Model.Input.Id" />
+
+        <!-- ── INFORMAÇÃO BÁSICA ── -->
+        <div class="form-card">
+            <h2 class="card-title">📋 Informação Básica</h2>
+            <div class="grid-2">
+
+                <div class="field col-full">
+                    <label asp-for="Input.Name">Nome da Receita</label>
+                    <input asp-for="Input.Name" placeholder="Ex: Caldo Verde Tradicional" />
+                    <span asp-validation-for="Input.Name" class="field-error"></span>
+                </div>
+
+                <div class="field col-full">
+                    <label asp-for="Input.Description">Descrição</label>
+                    <textarea asp-for="Input.Description" placeholder="Descreve a tua receita..."></textarea>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.CategoryId">Categoria</label>
+                    <select asp-for="Input.CategoryId" asp-items="Model.Categories">
+                        <option value="">-- Seleciona --</option>
+                    </select>
+                    <span asp-validation-for="Input.CategoryId" class="field-error"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.DifficultyId">Dificuldade</label>
+                    <select asp-for="Input.DifficultyId" asp-items="Model.Difficulties">
+                        <option value="">-- Seleciona --</option>
+                    </select>
+                    <span asp-validation-for="Input.DifficultyId" class="field-error"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.PreparationTime">Tempo de Preparação (minutos)</label>
+                    <input asp-for="Input.PreparationTime" type="number" min="1" placeholder="Ex: 30" />
+                    <span asp-validation-for="Input.PreparationTime" class="field-error"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ── INGREDIENTES ── -->
+        <div class="form-card">
+            <h2 class="card-title">🧂 Ingredientes</h2>
+
+            <div id="ingredientsList">
+                @for (int i = 0; i < Model.Ingredients.Count; i++)
+                {
+                    <div class="ingredient-row">
+                        <div class="field">
+                            <label>Ingrediente</label>
+                            <select name="Ingredients[@i].IngredientId">
+                                <option value="">-- Seleciona --</option>
+                                @foreach (var ing in Model.IngredientsList)
+                                {
+                                    <option value="@ing.Value"
+                                        selected="@(ing.Value == Model.Ingredients[i].IngredientId.ToString() ? "selected" : null)">
+                                        @ing.Text
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Quantidade</label>
+                            <input type="number" name="Ingredients[@i].Quantity"
+                                   value="@Model.Ingredients[i].Quantity" step="0.01" min="0" />
+                        </div>
+                        <div class="field">
+                            <label>Unidade</label>
+                            <select name="Ingredients[@i].MeasurementId">
+                                <option value="">-- Seleciona --</option>
+                                @foreach (var m in Model.Measurements)
+                                {
+                                   <option value="@m.Value"
+                                        selected="@(m.Value == Model.Ingredients[i].MeasurementId.ToString() ? "selected" : null)">
+                                        @m.Text
+                                   </option>
+                                }
+                            </select>
+                        </div>
+                        <button type="button" class="btn-remove-ingredient" onclick="removeIngredient(this)">✕</button>
+                    </div>
+                }
+            </div>
+
+            <button type="button" class="btn-add-ingredient" onclick="addIngredient()">
+                + Adicionar Ingrediente
+            </button>
+        </div>
+
+        <!-- ── MODO DE PREPARAÇÃO ── -->
+        <div class="form-card">
+            <h2 class="card-title">👨‍🍳 Modo de Preparação</h2>
+            <div class="field">
+                <label asp-for="Input.PreparationMethod">Passo a passo</label>
+                <textarea asp-for="Input.PreparationMethod" style="min-height:200px"
+                    placeholder="Descreve o modo de preparação..."></textarea>
+                <span asp-validation-for="Input.PreparationMethod" class="field-error"></span>
+            </div>
+        </div>
+
+        <!-- ── ACTIONS ── -->
+        <div class="form-actions">
+            <a href="/Recipes/Detail?id=@Model.Input.Id" class="btn-cancel">Cancelar</a>
+            <button type="submit" class="btn-submit">Guardar Alterações →</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    let ingredientCount = @Model.Ingredients.Count;
+
+    const ingredientsList = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.IngredientsList.Select(i => new { value = i.Value, text = i.Text })));
+
+    const measurementsList = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Measurements.Select(m => new { value = m.Value, text = m.Text })));
+
+    function buildOptions(items) {
+        return '<option value="">-- Seleciona --</option>' +
+            items.map(i => `<option value="${i.value}">${i.text}</option>`).join('');
+    }
+
+    function addIngredient() {
+        const row = document.createElement('div');
+        row.className = 'ingredient-row';
+        row.innerHTML = `
+            <div class="field">
+                <label>Ingrediente</label>
+                <select name="Ingredients[${ingredientCount}].IngredientId">
+                    ${buildOptions(ingredientsList)}
+                </select>
+            </div>
+            <div class="field">
+                <label>Quantidade</label>
+                <input type="number" name="Ingredients[${ingredientCount}].Quantity" step="0.01" min="0" placeholder="Ex: 2" />
+            </div>
+            <div class="field">
+                <label>Unidade</label>
+                <select name="Ingredients[${ingredientCount}].MeasurementId">
+                    ${buildOptions(measurementsList)}
+                </select>
+            </div>
+            <button type="button" class="btn-remove-ingredient" onclick="removeIngredient(this)">✕</button>
+        `;
+        document.getElementById('ingredientsList').appendChild(row);
+        ingredientCount++;
+    }
+
+    function removeIngredient(btn) {
+        const rows = document.querySelectorAll('.ingredient-row');
+        if (rows.length > 1) btn.closest('.ingredient-row').remove();
+    }
+</script>

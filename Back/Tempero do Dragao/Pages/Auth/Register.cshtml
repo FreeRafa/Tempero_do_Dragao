@@ -1,0 +1,406 @@
+﻿@page
+@model Tempero_do_Dragao.Pages.Auth.RegisterModel
+@{
+    ViewData["Title"] = "Registo";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registo · Tempero do Dragão</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --red-deep:   #8B0000;
+            --red-mid:    #A31515;
+            --red-bright: #C0392B;
+            --cream:      #F5ECD7;
+            --cream-dark: #E8D9C0;
+            --gold:       #C9A84C;
+            --charcoal:   #1A1A1A;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: var(--red-deep);
+            overflow: hidden;
+        }
+
+        /* ── LEFT PANEL ── */
+        .left-panel {
+            width: 42%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 3rem;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(192,57,43,0.4) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(139,0,0,0.6) 0%, transparent 50%);
+        }
+
+        .circle-bg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -52%);
+            width: 380px; height: 380px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, rgba(139,0,0,0.3) 70%);
+            border: 1px solid rgba(201,168,76,0.2);
+        }
+
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(201,168,76,0.08);
+        }
+        .ring-1 { width: 460px; height: 460px; top: 50%; left: 50%; transform: translate(-50%, -52%); }
+        .ring-2 { width: 540px; height: 540px; top: 50%; left: 50%; transform: translate(-50%, -52%); }
+
+        .hero-dish {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -58%);
+            font-size: 170px;
+            line-height: 1;
+            filter: drop-shadow(0 20px 50px rgba(0,0,0,0.5));
+            animation: float 4s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @@keyframes float {
+            0%, 100% { transform: translate(-50%, -58%); }
+            50%       { transform: translate(-50%, -63%); }
+        }
+
+        .deco-chars {
+            position: absolute;
+            font-size: 6rem;
+            font-weight: 900;
+            color: rgba(201,168,76,0.07);
+            font-family: serif;
+            line-height: 1;
+            z-index: 1;
+        }
+        .deco-left  { top: 5%;    left: 1.5rem; }
+        .deco-right { bottom: 22%; right: 1.5rem; text-align: right; }
+
+        .left-content { position: relative; z-index: 3; }
+
+        .tag {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--gold);
+            border: 1px solid rgba(201,168,76,0.4);
+            padding: 0.3rem 0.7rem;
+            border-radius: 2px;
+            margin-bottom: 0.8rem;
+        }
+
+        .left-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.4rem, 3.8vw, 3.6rem);
+            font-weight: 900;
+            line-height: 0.95;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+        .left-title span { color: var(--gold); display: block; }
+
+        .left-divider { width: 40px; height: 2px; background: var(--gold); margin: 1rem 0; }
+
+        .left-sub {
+            font-size: 0.85rem;
+            color: rgba(245,236,215,0.55);
+            font-weight: 300;
+            max-width: 240px;
+            line-height: 1.7;
+        }
+
+        /* ── RIGHT PANEL ── */
+        .right-panel {
+            width: 58%;
+            background: var(--cream);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2.5rem 3.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .right-panel::before {
+            content: '🐉';
+            position: absolute;
+            top: -1rem; right: -1rem;
+            font-size: 8rem;
+            opacity: 0.04;
+        }
+
+        .form-tag {
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--red-mid);
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--charcoal);
+            line-height: 1.1;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-subtitle {
+            font-size: 0.83rem;
+            color: #999;
+            font-weight: 300;
+            margin-bottom: 1.6rem;
+        }
+
+        /* Two column grid for fields */
+        .fields-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1.2rem;
+        }
+        .field-full { grid-column: 1 / -1; }
+
+        .alert-error {
+            background: rgba(139,0,0,0.07);
+            border-left: 3px solid var(--red-bright);
+            color: var(--red-deep);
+            padding: 0.7rem 1rem;
+            font-size: 0.82rem;
+            border-radius: 4px;
+            margin-bottom: 1.2rem;
+            grid-column: 1 / -1;
+        }
+
+        .alert-success {
+            background: rgba(39,174,96,0.08);
+            border-left: 3px solid #27ae60;
+            color: #1a5c35;
+            padding: 0.7rem 1rem;
+            font-size: 0.82rem;
+            border-radius: 4px;
+            margin-bottom: 1.2rem;
+            grid-column: 1 / -1;
+        }
+
+        .field { margin-bottom: 1rem; }
+
+        .field label {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--charcoal);
+            margin-bottom: 0.35rem;
+        }
+
+        .input-wrap { position: relative; }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.6rem;
+            border: 1.5px solid var(--cream-dark);
+            border-radius: 6px;
+            background: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem;
+            color: var(--charcoal);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9rem;
+            opacity: 0.35;
+        }
+
+        .field-error {
+            font-size: 0.72rem;
+            color: var(--red-bright);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.95rem;
+            background: var(--red-deep);
+            color: var(--cream);
+            border: none;
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 0.4rem;
+            transition: background 0.2s, transform 0.1s;
+            grid-column: 1 / -1;
+        }
+        .btn-submit:hover { background: var(--red-mid); transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(0); }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin: 1.2rem 0;
+            color: #bbb;
+            font-size: 0.75rem;
+            grid-column: 1 / -1;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--cream-dark);
+        }
+
+        .login-link { text-align: center; font-size: 0.82rem; color: #888; grid-column: 1 / -1; }
+        .login-link a {
+            color: var(--red-mid);
+            font-weight: 500;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(163,21,21,0.3);
+            transition: border-color 0.2s;
+        }
+        .login-link a:hover { border-color: var(--red-mid); }
+
+        @@media (max-width: 900px) {
+            .fields-grid { grid-template-columns: 1fr; }
+            .field-full  { grid-column: 1; }
+        }
+        @@media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; }
+            .left-panel  { width: 100%; min-height: 220px; padding: 2rem; }
+            .hero-dish   { font-size: 120px; }
+            .right-panel { width: 100%; padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="left-panel">
+        <div class="deco-chars deco-left">新<br>入</div>
+        <div class="deco-chars deco-right">歡<br>迎</div>
+        <div class="circle-bg"></div>
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="hero-dish">🍜</div>
+
+        <div class="left-content">
+            <span class="tag">Junta-te a nós</span>
+            <h1 class="left-title">
+                Cria a tua
+                <span>conta</span>
+            </h1>
+            <div class="left-divider"></div>
+            <p class="left-sub">Partilha as tuas receitas com o mundo e inspira outros cozinheiros.</p>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <p class="form-tag">Novo utilizador</p>
+        <h2 class="form-title">Regista-te<br>gratuitamente.</h2>
+        <p class="form-subtitle">Preenche os teus dados para começares.</p>
+
+        <form method="post">
+            <div class="fields-grid">
+
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert-error">⚠ @Model.ErrorMessage</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                {
+                    <div class="alert-success">✓ @Model.SuccessMessage</div>
+                }
+
+                <div class="field field-full">
+                    <label asp-for="Input.Name">Nome completo</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">👤</span>
+                        <input asp-for="Input.Name" type="text" placeholder="O teu nome" />
+                    </div>
+                    <span asp-validation-for="Input.Name" class="field-error"></span>
+                </div>
+
+                <div class="field field-full">
+                    <label asp-for="Input.Email">Email</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉</span>
+                        <input asp-for="Input.Email" type="email" placeholder="o_teu@email.com" />
+                    </div>
+                    <span asp-validation-for="Input.Email" class="field-error"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.Password">Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input asp-for="Input.Password" type="password" placeholder="••••••••" />
+                    </div>
+                    <span asp-validation-for="Input.Password" class="field-error"></span>
+                </div>
+
+                <div class="field">
+                    <label asp-for="Input.ConfirmPassword">Confirmar</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔑</span>
+                        <input asp-for="Input.ConfirmPassword" type="password" placeholder="••••••••" />
+                    </div>
+                    <span asp-validation-for="Input.ConfirmPassword" class="field-error"></span>
+                </div>
+
+                <button type="submit" class="btn-submit">Criar Conta →</button>
+
+                <div class="divider">ou</div>
+
+                <p class="login-link">
+                    Já tens conta? <a href="/Auth/Login">Inicia sessão</a>
+                </p>
+
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>
