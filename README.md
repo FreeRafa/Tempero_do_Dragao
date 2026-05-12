@@ -1,6 +1,6 @@
 # 🐉 Tempero do Dragão
 
-API REST para gestão de receitas culinárias, construída com **ASP.NET Core** e **Entity Framework Core**. Permite aos utilizadores partilhar, descobrir e avaliar receitas.
+Plataforma web de gestão de receitas culinárias, construída com **ASP.NET Core Razor Pages** e **ADO.NET puro**. Permite aos utilizadores partilhar, descobrir, comentar e avaliar receitas.
 
 ---
 
@@ -13,22 +13,25 @@ API REST para gestão de receitas culinárias, construída com **ASP.NET Core** 
 - [Funcionalidades](#funcionalidades)
 - [Como Executar](#como-executar)
 - [Estrutura do Projeto](#estrutura-do-projeto)
-- [Endpoints](#endpoints)
 
 ---
 
 ## Sobre o Projeto
 
-O **Tempero do Dragão** é uma plataforma de receitas que permite aos utilizadores registarem-se, submeterem as suas receitas, comentar e avaliar receitas de outros utilizadores, e guardar as suas favoritas.
+O **Tempero do Dragão** é uma plataforma web de receitas que permite aos utilizadores registarem-se, submeterem as suas receitas com imagens, comentar e avaliar receitas de outros utilizadores, e guardar as suas favoritas.
+
+O projeto utiliza **ADO.NET puro** para acesso à base de dados, sem recurso a ORM — todo o SQL é escrito à mão, com controlo total sobre as queries, transações e mapeamento de dados.
 
 ---
 
 ## Tecnologias
 
-- [.NET / ASP.NET Core](https://dotnet.microsoft.com/)
-- [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/)
-- SQL Server (ou outro provider configurado no `AppDbContext`)
+- [.NET / ASP.NET Core Razor Pages](https://dotnet.microsoft.com/)
+- [ADO.NET](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/) com `Microsoft.Data.SqlClient`
+- SQL Server (LocalDB em desenvolvimento)
 - Padrão Repository + Service Layer
+- Sessões para autenticação
+- Upload de imagens local (Docker-ready via volume)
 
 ---
 
@@ -36,21 +39,21 @@ O **Tempero do Dragão** é uma plataforma de receitas que permite aos utilizado
 
 O projeto segue uma arquitetura em camadas:
 
-```
-┌─────────────────────────────┐
-│        Controllers          │  ← Recebe os pedidos HTTP
-├─────────────────────────────┤
+┌─────────────────────────────────────────────────────────┐
+│        Razor Pages          │  ← Interface web (.cshtml + .cshtml.cs)
+├─────────────────────────────────────────────────────────┤
 │         Services            │  ← Lógica de negócio
-├─────────────────────────────┤
-│        Repositories         │  ← Acesso à base de dados
-├─────────────────────────────┤
-│      Entity Framework       │  ← ORM
-├─────────────────────────────┤
+├─────────────────────────────────────────────────────────┤
+│        Repositories         │  ← Acesso à base de dados (SQL escrito à mão)
+├─────────────────────────────────────────────────────────┤
+│    ADO.NET / SqlClient      │  ← Ligação direta ao SQL Server
+├─────────────────────────────────────────────────────────┤
 │       Base de Dados         │
-└─────────────────────────────┘
-```
+└─────────────────────────────────────────────────────────┘
 
-A classe base `Repository<T>` fornece as operações CRUD genéricas. Cada entidade tem o seu repositório específico para queries mais complexas.
+A classe base `Repository<T>` guarda a referência à `DbConnectionFactory`. Cada repositório implementa as suas próprias queries SQL com `SqlConnection`, `SqlCommand` e `SqlDataReader`.
+
+Operações complexas como criar ou editar receitas com ingredientes usam `SqlTransaction` para garantir atomicidade.
 
 ---
 
@@ -58,25 +61,23 @@ A classe base `Repository<T>` fornece as operações CRUD genéricas. Cada entid
 
 ### Relações entre entidades
 
-```
 User ──────────< Recipe >────── Category
-  │                │ └────────── Difficulty
-  │                │
-  ├──< Comment >───┘
-  ├──< Rating  >───┘
-  └──< Favorite>───┘
-                   │
-              RecipeIngredient
-                 │       │
-            Ingredient  Measurement
-```
+│                │ └────────── Difficulty
+│                │
+├──< Comment >───┘
+├──< Rating  >───┘
+└──< Favorite>───┘
+│
+RecipeIngredient
+│       │
+Ingredient  Measurement
 
 ### Entidades principais
 
 | Entidade | Descrição |
 |---|---|
 | `User` | Utilizador da plataforma (pode ser admin) |
-| `Recipe` | Receita com nome, método, tempo e dificuldade |
+| `Recipe` | Receita com nome, método, tempo, dificuldade e imagem |
 | `Category` | Categoria da receita (ex: Sobremesa, Sopa) |
 | `Difficulty` | Nível de dificuldade (ex: Fácil, Médio, Difícil) |
 | `Ingredient` | Ingrediente individual |
@@ -91,18 +92,19 @@ User ──────────< Recipe >────── Category
 ## Funcionalidades
 
 ### Utilizadores
-- Registo e login
+- Registo e login com sessão
 - Verificação de email duplicado
-- Perfil com histórico de receitas, comentários e favoritos
+- Controlo de acesso por papel (utilizador / admin)
 
 ### Receitas
 - Criação, edição e remoção de receitas
+- Upload de imagem por receita (JPG, PNG, WEBP)
 - Pesquisa por nome, categoria, dificuldade ou utilizador
-- Estado de publicação (`Status`)
+- Página de detalhe com hero de imagem, ingredientes e modo de preparação
 
 ### Interações
-- **Comentários** — adicionar, editar e remover comentários por receita ou utilizador
-- **Avaliações** — classificar receitas de 1 a 5 estrelas (uma avaliação por utilizador por receita)
+- **Comentários** — publicar e remover comentários por receita
+- **Avaliações** — classificar receitas de 1 a 5 estrelas (uma por utilizador por receita)
 - **Favoritos** — guardar e remover receitas favoritas, sem duplicados
 
 ---
@@ -112,7 +114,7 @@ User ──────────< Recipe >────── Category
 ### Pré-requisitos
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- SQL Server (ou outro provider compatível)
+- SQL Server ou SQL Server LocalDB
 
 ### Passos
 
@@ -122,22 +124,21 @@ git clone https://github.com/teu-utilizador/tempero-do-dragao.git
 cd tempero-do-dragao
 
 # 2. Configurar a connection string em appsettings.json
-# "ConnectionStrings": { "DefaultConnection": "Server=...;Database=TemperoDb;..." }
+# "ConnectionStrings": { "DefaultConnection": "Server=...;Database=Tempero_do_Dragao;..." }
 
-# 3. Aplicar as migrações
-dotnet ef database update
+# 3. Criar a base de dados
+# Executar o ficheiro SQL/CreateDatabase.sql no SQL Server Management Studio ou Azure Data Studio
 
 # 4. Executar a aplicação
 dotnet run
 ```
 
-A API ficará disponível em `https://localhost:5001` por defeito.
+A aplicação ficará disponível em `https://localhost:5001` por defeito.
 
 ---
 
 ## Estrutura do Projeto
 
-```
 Tempero_do_Dragao/
 │
 ├── Model/                  # Entidades do domínio
@@ -152,14 +153,14 @@ Tempero_do_Dragao/
 │   ├── Rating.cs
 │   └── Favorite.cs
 │
-├── Repositories/           # Acesso à base de dados
-│   ├── Repository.cs           ← Base genérica
-│   ├── RecipeRepository.cs
+├── Repositories/           # Acesso à base de dados (ADO.NET)
+│   ├── Repository.cs           ← Base abstrata com DbConnectionFactory
+│   ├── RecipeRepository.cs     ← Queries com JOIN e SqlTransaction
 │   ├── UserRepository.cs
 │   ├── CommentRepository.cs
 │   ├── FavoriteRepository.cs
 │   ├── RatingRepository.cs
-│   └── SimpleRepositorie.cs    ← Category, Difficulty, Ingredient, Measurement
+│   └── SimpleRepositories.cs   ← Category, Difficulty, Ingredient, Measurement
 │
 ├── Services/               # Lógica de negócio
 │   ├── RecipeService.cs
@@ -167,40 +168,41 @@ Tempero_do_Dragao/
 │   ├── CommentService.cs
 │   ├── FavoriteService.cs
 │   ├── RatingService.cs
+│   ├── ImageService.cs         ← Upload e eliminação de imagens
 │   └── SimpleService.cs        ← Category, Difficulty, Ingredient, Measurement
 │
-└── Data/
-    └── AppDbContext.cs     # Contexto do Entity Framework
-```
-
----
-
-## Endpoints
-
-> Documentação completa disponível via Swagger em `/swagger` após executar o projeto.
-
-### Exemplos
-
-| Método | Rota | Descrição |
-|---|---|---|
-| `POST` | `/api/users/register` | Registar utilizador |
-| `POST` | `/api/users/login` | Login |
-| `GET` | `/api/recipes` | Listar todas as receitas |
-| `GET` | `/api/recipes/{id}` | Detalhe de uma receita |
-| `POST` | `/api/recipes` | Criar receita |
-| `GET` | `/api/recipes/search?name=` | Pesquisar por nome |
-| `POST` | `/api/ratings` | Avaliar receita |
-| `POST` | `/api/favorites` | Adicionar aos favoritos |
-| `GET` | `/api/comments/recipe/{id}` | Comentários de uma receita |
+├── Pages/                  # Razor Pages
+│   ├── Recipes/
+│   │   ├── Index.cshtml        ← Listagem de receitas
+│   │   ├── Detail.cshtml       ← Detalhe, comentários, avaliação, favorito
+│   │   ├── Create.cshtml       ← Criar receita com imagem
+│   │   └── Edit.cshtml         ← Editar receita com imagem
+│   ├── Auth/
+│   │   ├── Login.cshtml
+│   │   └── Register.cshtml
+│   └── Favorites.cshtml
+│
+├── Data/
+│   └── DbConnectionFactory.cs  ← Singleton de ligação ao SQL Server
+│
+├── SQL/
+│   └── CreateDatabase.sql      ← Script completo de criação da BD
+│
+└── wwwroot/
+└── uploads/
+└── recipes/  
 
 ---
 
 ## Notas de Desenvolvimento
 
+- Todo o acesso à base de dados é feito com **ADO.NET puro** — sem ORM, sem migrations, SQL escrito à mão.
+- A criação e edição de receitas com ingredientes é feita dentro de uma **`SqlTransaction`** para garantir atomicidade.
 - As avaliações estão limitadas a valores entre **1 e 5**, validadas na camada de serviço e com `CHECK constraint` na base de dados.
 - Os favoritos não permitem duplicados — verificação feita antes de inserir.
-- O campo `Status` nas entidades `User` e `Recipe` pode ser usado para soft delete ou moderação de conteúdo.
+- As imagens são guardadas em `wwwroot/uploads/recipes/` com nome gerado por `Guid`. O caminho relativo é guardado na base de dados.
+- O projeto está preparado para **Docker** — o diretório de imagens pode ser montado como volume externo sem alterações ao código.
 
 ---
 
-*Projeto desenvolvido em C# com ASP.NET Core.*
+*Projeto académico desenvolvido em C# com ASP.NET Core Razor Pages.*
