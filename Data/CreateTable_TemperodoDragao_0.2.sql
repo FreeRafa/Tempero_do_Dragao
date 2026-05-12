@@ -1,4 +1,3 @@
-
 /* =========================================================
    TABLES
 ========================================================= */
@@ -32,9 +31,8 @@ CREATE TABLE [User] (
     Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
     Email NVARCHAR(150) NOT NULL,
-    Password NVARCHAR(255) NOT NULL,
+    Password NVARCHAR(500) NOT NULL,         
     IsAdmin BIT NOT NULL CONSTRAINT DF_User_IsAdmin DEFAULT (0),
-
     Status INT NOT NULL CONSTRAINT DF_User_Status DEFAULT (0),
 
     CONSTRAINT UQ_User_Email UNIQUE (Email)
@@ -47,8 +45,9 @@ CREATE TABLE Recipe (
     PreparationMethod NVARCHAR(MAX) NOT NULL,
     PreparationTime INT NOT NULL,
     Description NVARCHAR(MAX) NULL,
-
     Status INT NOT NULL CONSTRAINT DF_Recipe_Status DEFAULT (0),
+    CreatedAt DATETIME NOT NULL CONSTRAINT DF_Recipe_CreatedAt DEFAULT (GETDATE()), 
+    ImagePath NVARCHAR(500) NULL,                                                    
 
     UserId INT NOT NULL,
     CategoryId INT NOT NULL,
@@ -75,6 +74,7 @@ CREATE TABLE Favorite (
 CREATE TABLE Comment (
     Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
     Content NVARCHAR(MAX) NOT NULL,
+    CreatedAt DATETIME NOT NULL CONSTRAINT DF_Comment_CreatedAt DEFAULT (GETDATE()), 
     UserId INT NOT NULL,
     RecipeId INT NOT NULL
 );
@@ -87,6 +87,7 @@ CREATE TABLE Rating (
     UserId INT NOT NULL,
     RecipeId INT NOT NULL,
 
+    CONSTRAINT CHK_Rating_Score CHECK (Score >= 1 AND Score <= 5), 
     CONSTRAINT UQ_Rating UNIQUE (UserId, RecipeId)
 );
 
@@ -151,3 +152,6 @@ FOREIGN KEY (UserId) REFERENCES [User](Id) ON DELETE CASCADE;
 ALTER TABLE Rating
 ADD CONSTRAINT FK_Rating_Recipe 
 FOREIGN KEY (RecipeId) REFERENCES Recipe(Id) ON DELETE CASCADE;
+
+GO
+
